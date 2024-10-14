@@ -1,0 +1,10 @@
+span.pageSelection {
+    background-color: rgb(117, 117, 117);
+    font-size: medium;
+  }
+  #noSelection {
+    font-size: medium;
+    text-decoration: none;
+    color: black;
+    background-color: rgb(138, 138, 138);
+  }
