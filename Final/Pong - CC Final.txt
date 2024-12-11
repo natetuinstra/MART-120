@@ -1,0 +1,411 @@
+﻿//game variables
+var game = 0;
+var pongX = 270;
+var pongY = 362.5;
+var difficultyX = 1080;
+var difficultyY = 490;
+var mousex = -50;
+var mousey = -50;
+var instructionx;
+var instructiony;
+
+
+//player variables
+var playerx = 25;
+var playery = 287.5;
+var playerScore = 0;
+var playerSpeed = 10;
+
+
+//computer variables
+var computerx = 1430;
+var computery = 287.5;
+var computerScore = 0;
+var computerSpeed = 7;
+
+
+//ball variables
+var ballX = 740;
+var ballY = 362.5;
+var ballMoveX;
+var ballMoveY;
+var ballSpeed = 10;
+
+
+//win or loss variables
+var winx;
+var winy;
+var lossx;
+var lossy;
+var scoreWin = 5;
+
+
+function setup()
+{
+    createCanvas(1480,725);
+    //chooses ball direction - speed is corrected later in draw() under the ballMove call
+    ballMoveX = random(-1,1,);
+    ballMoveY = ballMoveX * random(-1,1);
+}
+
+
+function draw()
+{
+    //background MUST be before everything else!!!
+    background(0);
+
+
+    //controls whether or not the game has begun through press of ENTER (key code == 13)
+    if(game == 0){
+        ballSpeed=0
+       
+       
+        gameStart(pongX,pongY,difficultyX,difficultyY);
+    }
+    else{
+        pongX = -100
+        pongY = -100
+        difficultyX = -100
+        difficultyY = -100
+    }
+    if(keyIsDown(13) && game ==0){
+        ballSpeed =10
+        game += 1
+    }
+
+
+    //controls difficulty selection and changes difficulty based off selection
+    if(mousex > 900 && mousex < 1010 && mousey >= 400 && mousey < 440){
+        difficultyX=null + 945
+        computerSpeed =5
+    }
+    if(mousex > 1010 && mousex < 1170 && mousey >= 400 && mousey < 440){
+        difficultyX=null + 1080
+        computerSpeed =7
+    }
+    if(mousex > 1170 && mousex < 1270 && mousey >= 400 && mousey < 440){
+        difficultyX=null + 1225
+        computerSpeed =9
+    }
+
+
+    //calls centerline
+    centerline(727.5,349.5,25, 299.5, 249.5, 199.5, 149.5, 99.5, 49.5, -.5, 399.5, 449.5, 499.5, 549.5, 599.5, 649.5, 700.5);
+
+
+    //calls player
+    player(255,255,255,playerx,playery,25,150);
+
+
+    //calls player movement
+    playerMove(83,87,playerSpeed);
+
+
+    //detects player on wall
+    if(playery <= 0){
+        playery=null
+    }
+    if(playery + 150 >= 725){
+        playery=null + 575
+    }
+
+
+    //calls computer paddle
+    computer(computerx,computery,25,150)
+
+
+    //calls computer movement
+    computerMove(computerSpeed);
+
+
+    //detects computer on wall
+    if(computery <= 0){
+        computery=null
+    }
+    if(computery + 150 >= 725){
+        computery=null + 575
+    }
+
+
+    //calls ball
+    ball(ballX,ballY,25);
+
+
+    //calls ball movement
+    ballMove(ballSpeed);
+    if(ballMoveX <.9 && ballMoveX > -.9 && ballMoveX >0){ //if statement increases ball movement if ball is too slow
+       ballMoveX +=.1
+    }
+    else if(ballMoveX <.9 && ballMoveX > -.9 && ballMoveX <0){
+        ballMoveX -=.1
+    }
+
+
+    //bounces ball off top and bottom of screen
+    if(ballY -12.5<= 0) {
+        ballMoveY*=-1;
+    }
+    if (ballY +12.5>= 725) {
+        ballMoveY*=-1;
+    }
+
+
+    //bounces ball off player paddle and increases ball speed
+    if(playerx +25 >= ballX -12.5 && playerx <= ballX +12.5 && playery +150 >= ballY -12.5 && playery <= ballY +12.5){
+        ballMoveX *= -1
+        ballSpeed +=1
+    }
+    if(playerx +25 >= ballX -12.5 && playerx <= ballX +12.5 && playery +150 >= ballY -12.5 && playery <= ballY +12.5 && keyIsDown(83) && ballY < computery + 75){
+        ballMoveY *= -1
+        ballMoveY -=.25
+    }
+    if(playerx +25 >= ballX -12.5 && playerx <= ballX +12.5 && playery +150 >= ballY -12.5 && playery <= ballY +12.5 && keyIsDown(87) && ballY > computery + 75){
+        ballMoveY *= -1
+        ballMoveY += .25
+    }
+
+
+    //bounces ball of computer paddle and increases ball speed
+    if(computerx +25 >= ballX -12.5 && computerx <= ballX +12.5 && computery +150 >= ballY -12.5 && computery <= ballY +12.5){
+        ballMoveX *= -1
+        ballSpeed +=1
+    }
+    if(computerx +25 >= ballX -12.5 && computerx <= ballX +12.5 && computery +150 >= ballY -12.5 && computery <= ballY +12.5 && ballY > computery + 40 && ballY < computery + 70){
+        ballMoveY *= -1
+        ballMoveY -=.25
+    }
+    if(computerx +25 >= ballX -12.5 && computerx <= ballX +12.5 && computery +150 >= ballY -12.5 && computery <= ballY +12.5 && ballY < computery + 110 && ballY > computery + 80){
+        ballMoveY *= -1
+        ballMoveY +=.25
+    }
+
+
+    //calls score
+    score (computerScore, playerScore, 780, 50, 670, 50);
+
+
+    //detects point scored and resets ball
+    if(ballX <= 0){
+        computerScore += 1;
+        ballX = 740;
+        ballY = 362.5;
+        ballMoveX = random(-1,1,);
+        ballMoveY = ballMoveX * random(-1,1);
+        ballSpeed = 10;
+    }
+    if(ballX >= 1480){
+        playerScore +=1;
+        ballX = 740;
+        ballY = 362.5;
+        ballMoveX = random(-1,1,);
+        ballMoveY = ballMoveX * random(-1,1);
+        ballSpeed = 10;
+    }
+
+
+    //win/loss detection
+    if(playerScore == scoreWin){
+        winx= 300
+        winy= 362.5
+        playerWin(winx,winy)
+    }
+    if(computerScore == scoreWin){
+        lossx= 1000
+        lossy= 362.5
+        computerWin(lossx,lossy)
+    }
+
+
+    //reset (when r pressed)
+    if(playerScore == scoreWin && keyIsDown(82) || computerScore == scoreWin && keyIsDown(82)){
+        winx= -100
+        winy= -100
+        playerScore = 0
+        computerScore = 0
+        ballSpeed = 10
+        pongX = 270;
+        pongY = 362.5;
+        difficultyX = 1080;
+        difficultyY = 490;
+        game=0
+    }
+
+
+     //instructions
+     instructions(instructionx,instructiony,1480,725)
+
+
+     if(keyIsDown(73) && game == 0){
+         instructionx = 0;
+         instructiony = 0;
+     }
+     else{
+         instructionx = 1481;
+         instructiony = 726;
+     }
+}
+//^^^end of draw ^^^
+
+
+//game start
+function gameStart(x,y,x2,y2){
+    fill(40,40,40);
+    textSize(100);
+    text('Pong',x,y);
+    textSize(30);
+    text('Press ENTER to begin.',x-35,y+70);
+    textSize(15);
+    text('Hold "I" for instructions.',x+40,y+100)
+    textSize(40);
+    text('Difficulty:',x+740,y);
+    text('Easy | Normal | Hard',x+635,y+70);
+    text('^',x2,y2)
+}
+
+
+//used for difficulty selction
+function mousePressed()
+{
+    mousex = mouseX;
+    mousey = mouseY;
+}
+
+
+//centerline
+function centerline(x,y1,size,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15){
+    fill(255,255,255);
+    square(x,y1,size);
+    square(x,y2,size);
+    square(x,y3,size);
+    square(x,y4,size);
+    square(x,y5,size);
+    square(x,y6,size);
+    square(x,y7,size);
+    square(x,y8,size);
+    square(x,y9,size);
+    square(x,y10,size);
+    square(x,y11,size);
+    square(x,y12,size);
+    square(x,y13,size);
+    square(x,y14,size);
+    square(x,y15,size);
+}
+
+
+//player
+function player(red,green,blue,x,y,length,width){
+    fill(red,green,blue);
+    rect(x,y,length,width);
+}
+
+
+//player movement
+function playerMove(w,s,speed){
+      if (keyIsDown(s)) {
+        playery -= speed;
+      } else if (keyIsDown(w)) {
+        playery += speed;
+      }
+}
+
+
+//computer
+function computer(x,y,length,width){
+    rect(x,y,length,width);
+}
+ 
+//computer movement
+function computerMove(speed){
+    if(ballY < computery + 12.5){
+        computery -= speed
+    }
+    else if(ballY > computery +138.5){
+        computery += speed
+    }
+}
+
+
+//ball
+function ball(x,y,diameter){
+    circle(x,y,diameter);
+}
+
+
+//ball movement
+function ballMove(speed){
+    ballX += ballMoveX * speed
+    ballY += ballMoveY * speed
+}
+
+
+//score
+function score(player,computer,px,py,cx,cy){
+    textSize(40);
+    text(player,px,py);
+    text(computer,cx,cy);
+}
+
+
+//player win
+function playerWin(x,y){
+    textSize(40)
+    text('You Win!',x,y)
+    textSize(20)
+    text('Press "R" to reset.',x+5,y+40)
+    //game =0
+    ballSpeed*=0
+}
+
+
+//computer win
+function computerWin(x,y){
+    textSize(40)
+    text('Computer Wins!',x,y)
+    textSize(20)
+    text('Press "R" to reset.',x+75,y+40)
+    //game =0
+    ballSpeed*=0
+}
+
+
+//instructions
+function instructions(x,y,length,width){
+    fill(10,10,10);
+    rect(x,y,length,width);
+    fill(255,255,255);
+    textSize(40);
+    text('Instructions:',x+50,y+75);
+    text('- Use "W" and "S" keys to move paddle up and down.',x+75,y+125);
+    text('- Select difficulty by clicking "Easy," "Normal," or "Hard."',x+75,y+200);
+    text('- The difficulty selection changes the speed of the computer.',x+125,y+250);
+    text('- Press "ENTER" to begin the game after selecting difficulty.',x+75,y+325);
+    textSize(20);
+    text('Tip: Spin the ball by hitting it the opposite direction it is traveling.',x+75,y+700);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+Html under this text
+
+
+<html>
+    <head>
+        <title>
+            Pong - CC Final
+        </title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.1.9/p5.min.js"></script>
+        <script src="p5.js"></script>
+        <script src="pong.js"></script>
+    </head>
+    <body>
+    </body>
+</html>
